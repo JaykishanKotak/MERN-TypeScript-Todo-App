@@ -15,12 +15,19 @@ export const createNote: RequestHandler = async (req, res) => {
 
   // await newNote.save();
 
-  await Note.create<NoteDocument>({
+  const newNote = await Note.create<NoteDocument>({
     title: (req.body as IncomingBody).title,
     description: (req.body as IncomingBody).description,
   });
 
-  res.json({ message: "Note created successfully !" });
+  res.json({
+    note: {
+      id: newNote._id,
+      title: newNote.title,
+      description: newNote.description,
+    },
+    message: "Note created successfully !",
+  });
 };
 
 export const updateSingleNote: RequestHandler = async (req, res) => {
@@ -40,7 +47,10 @@ export const updateSingleNote: RequestHandler = async (req, res) => {
     { new: true }
   );
   if (!note) return res.json({ error: "Note not found !" });
-  res.json({ note, message: "Note updated successfully !" });
+  res.json({
+    note: { id: note._id, title: note.title, description: note.description },
+    message: "Note updated successfully !",
+  });
 };
 
 export const removeSingleNote: RequestHandler = async (req, res) => {
@@ -60,7 +70,14 @@ export const removeSingleNote: RequestHandler = async (req, res) => {
 export const getAllNotes: RequestHandler = async (req, res) => {
   //Find every note document from db
   const notes = await Note.find({});
-  res.json({ notes });
+  const finalNotes = notes.map((note) => {
+    return {
+      id: note.id,
+      title: note.title,
+      description: note.description,
+    };
+  });
+  res.json({ notes: finalNotes });
 };
 
 export const getSingleNote: RequestHandler = async (req, res) => {
@@ -69,7 +86,9 @@ export const getSingleNote: RequestHandler = async (req, res) => {
   //Find every note document from db
   const note = await Note.findById(id);
   if (!note) return res.json({ error: "Note not found !" });
-  res.json({ note });
+  res.json({
+    note: { id: note._id, title: note.title, description: note.description },
+  });
 };
 
 // app.get("/", (req, res) => {
